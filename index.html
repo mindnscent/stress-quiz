@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 스트레스 유형 진단 - MIND N SCENT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, #eef2ec 0%, #dfe6da 50%, #d4dccf 100%);
+    min-height: 100vh;
+    color: #3a3a3a;
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  .header {
+    text-align: center;
+    padding: 30px 0 20px;
+  }
+
+  .header .logo-img {
+    height: 72px;
+    margin-bottom: 16px;
+    background: transparent;
+    mix-blend-mode: multiply;
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #3d4f3d;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+
+  .header .subtitle {
+    font-size: 14px;
+    color: #6b7f6b;
+    line-height: 1.6;
+  }
+
+  .progress-bar {
+    background: rgba(255,255,255,0.5);
+    border-radius: 20px;
+    height: 6px;
+    margin: 20px 0 10px;
+    overflow: hidden;
+    position: sticky;
+    top: 10px;
+    z-index: 10;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7a9e7a, #5c855c);
+    border-radius: 20px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-text {
+    text-align: center;
+    font-size: 13px;
+    color: #6b7f6b;
+    margin-bottom: 20px;
+  }
+
+  .quiz-card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    padding: 13px 14px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .checklist-item:hover {
+    background: rgba(122,158,122,0.08);
+  }
+
+  .checklist-item.checked {
+    background: rgba(122,158,122,0.12);
+  }
+
+  .checklist-item input[type="checkbox"] {
+    display: none;
+  }
+
+  .custom-checkbox {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #a3b8a3;
+    border-radius: 6px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .checklist-item.checked .custom-checkbox {
+    background: #5c855c;
+    border-color: #5c855c;
+  }
+
+  .custom-checkbox::after {
+    content: '\2713';
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .checklist-item.checked .custom-checkbox::after {
+    opacity: 1;
+  }
+
+  .checklist-label {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #3d4f3d;
+  }
+
+  .submit-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #5c855c, #7a9e7a);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 600;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(92,133,92,0.3);
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(92,133,92,0.4);
+  }
+
+  /* Results */
+  .result-container {
+    display: none;
+    animation: fadeIn 0.6s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-card {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    text-align: center;
+  }
+
+  .result-card h2 {
+    font-size: 22px;
+    color: #3d4f3d;
+    margin-bottom: 6px;
+  }
+
+  .result-card .result-subtitle {
+    font-size: 14px;
+    color: #6b7f6b;
+    margin-bottom: 24px;
+  }
+
+  .type-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .type-badge.primary { background: #3d4f3d; color: white; }
+  .type-badge.secondary { background: #c4d4c4; color: #3d4f3d; }
+  .type-badge.complex { background: linear-gradient(135deg, #3d4f3d, #5c855c); color: white; }
+
+  .result-type-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #3d4f3d;
+    margin: 8px 0;
+  }
+
+  .result-type-emoji {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+
+  .score-bar-container {
+    margin: 20px 0;
+    text-align: left;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .score-label {
+    width: 90px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #3d4f3d;
+    text-align: right;
+  }
+
+  .score-bar-bg {
+    flex: 1;
+    height: 10px;
+    background: #dfe6da;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.8s ease;
+  }
+
+  .score-bar-fill.type-a { background: linear-gradient(90deg, #e8a87c, #d4956b); }
+  .score-bar-fill.type-b { background: linear-gradient(90deg, #7ec8e3, #5fb3d0); }
+  .score-bar-fill.type-c { background: linear-gradient(90deg, #f7dc6f, #f4d03f); }
+  .score-bar-fill.type-d { background: linear-gradient(90deg, #e8a0bf, #d486a8); }
+  .score-bar-fill.type-e { background: linear-gradient(90deg, #f0a868, #e09050); }
+  .score-bar-fill.type-f { background: linear-gradient(90deg, #81c784, #66bb6a); }
+
+  .score-value {
+    width: 35px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #3d4f3d;
+  }
+
+  .tip-box {
+    background: rgba(255,255,255,0.85);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+
+  .tip-box h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: #3d4f3d;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .tip-box p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #4a5e4a;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .retry-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    color: #6b7f6b;
+    border: 2px solid #a3b8a3;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+  }
+
+  .retry-btn:hover {
+    background: #5c855c;
+    color: white;
+    border-color: #5c855c;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 30px 0;
+    font-size: 12px;
+    color: #8a9e8a;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <img src="data:image/png;base64,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" class="logo-img" alt="MIND N SCENT">
+    <h1>나의 스트레스 유형 진단</h1>
+    <p class="subtitle">해당하는 항목에 체크해 주세요.<br>총 48문항이며, 결과는 자동으로 계산됩니다.</p>
+  </div>
+
+  <div id="quizForm">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">0 / 48</div>
+
+    <div class="quiz-card">
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="d"><span class="custom-checkbox"></span>
+        <span class="checklist-label">누군가의 말에 쉽게 상처받는다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="c"><span class="custom-checkbox"></span>
+        <span class="checklist-label">기억력이 떨어진 것 같다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="d"><span class="custom-checkbox"></span>
+        <span class="checklist-label">감정 기복이 심한 편이다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="b"><span class="custom-checkbox"></span>
+        <span class="checklist-label">가슴이 답답하거나 심장이 빨리 뛸 때가 있다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="c"><span class="custom-checkbox"></span>
+        <span class="checklist-label">주말에 쉬어도 개운하지 않다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="b"><span class="custom-checkbox"></span>
+        <span class="checklist-label">괜히 불안하고 초조한 느낌이 든다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="d"><span class="custom-checkbox"></span>
+        <span class="checklist-label">감정을 표현하기보다 꾹 참는 편이다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="e"><span class="custom-checkbox"></span>
+        <span class="checklist-label">몸이 피곤한데도 멈추지 못한다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="b"><span class="custom-checkbox"></span>
+        <span class="checklist-label">긴장을 풀기가 어렵다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="a"><span class="custom-checkbox"></span>
+        <span class="checklist-label">눈이 쉽게 피로하고 침침하다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="e"><span class="custom-checkbox"></span>
+        <span class="checklist-label">멀티태스킹을 자주 한다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="a"><span class="custom-checkbox"></span>
+        <span class="checklist-label">몸이 무겁고 뻐근한 느낌이 자주 든다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="f"><span class="custom-checkbox"></span>
+        <span class="checklist-label">스마트폰이나 영상에 시간을 많이 쓴다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="d"><span class="custom-checkbox"></span>
+        <span class="checklist-label">갑자기 눈물이 나거나 감정이 올라올 때가 있다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="b"><span class="custom-checkbox"></span>
+        <span class="checklist-label">사소한 일에도 걱정이 꼬리를 문다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="e"><span class="custom-checkbox"></span>
+        <span class="checklist-label">일정이 비어 있으면 오히려 불편하다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="d"><span class="custom-checkbox"></span>
+        <span class="checklist-label">나만 힘든 것 같다는 생각이 든다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="f"><span class="custom-checkbox"></span>
+        <span class="checklist-label">해야 할 일인데 자꾸 미루게 된다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="c"><span class="custom-checkbox"></span>
+        <span class="checklist-label">만성적으로 피곤하다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="d"><span class="custom-checkbox"></span>
+        <span class="checklist-label">사람들과 있으면 에너지가 빨리 소진된다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="f"><span class="custom-checkbox"></span>
+        <span class="checklist-label">갈등 상황에서 자기 의견을 잘 말하지 못한다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="e"><span class="custom-checkbox"></span>
+        <span class="checklist-label">쉬고 있으면 뭔가 해야 할 것 같은 불안감이 든다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="e"><span class="custom-checkbox"></span>
+        <span class="checklist-label">남에게 일을 맡기기보다 직접 하는 편이다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="d"><span class="custom-checkbox"></span>
+        <span class="checklist-label">작은 일에도 쉽게 짜증이 난다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="c"><span class="custom-checkbox"></span>
+        <span class="checklist-label">단 음식이나 카페인을 자주 찾게 된다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="c"><span class="custom-checkbox"></span>
+        <span class="checklist-label">해야 할 일을 자꾸 미루게 된다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="f"><span class="custom-checkbox"></span>
+        <span class="checklist-label">현실을 잊기 위해 뭔가에 몰두할 때가 있다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="f"><span class="custom-checkbox"></span>
+        <span class="checklist-label">"나중에 하자"가 습관이 되었다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="a"><span class="custom-checkbox"></span>
+        <span class="checklist-label">어깨나 목이 자주 뻣뻣하고 뭉친다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="c"><span class="custom-checkbox"></span>
+        <span class="checklist-label">집중력이 예전 같지 않다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="c"><span class="custom-checkbox"></span>
+        <span class="checklist-label">아침에 일어나기가 힘들다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="f"><span class="custom-checkbox"></span>
+        <span class="checklist-label">문제가 생기면 일단 피하고 본다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="b"><span class="custom-checkbox"></span>
+        <span class="checklist-label">나도 모르게 한숨을 자주 쉰다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="e"><span class="custom-checkbox"></span>
+        <span class="checklist-label">성취감이 없으면 하루가 허무하다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="f"><span class="custom-checkbox"></span>
+        <span class="checklist-label">중요한 결정을 내리기가 힘들다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="a"><span class="custom-checkbox"></span>
+        <span class="checklist-label">이를 악물거나 턱에 힘이 들어갈 때가 많다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="d"><span class="custom-checkbox"></span>
+        <span class="checklist-label">혼자 있고 싶은데 또 외로움을 느낀다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="e"><span class="custom-checkbox"></span>
+        <span class="checklist-label">쉬는 날에도 완전히 쉬지 못한다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="a"><span class="custom-checkbox"></span>
+        <span class="checklist-label">소화가 잘 안 되거나 속이 더부룩하다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="e"><span class="custom-checkbox"></span>
+        <span class="checklist-label">"바쁘다"가 입에 달고 사는 말이다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="a"><span class="custom-checkbox"></span>
+        <span class="checklist-label">손발이 차갑거나 혈액순환이 안 되는 느낌이다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="b"><span class="custom-checkbox"></span>
+        <span class="checklist-label">잠들기 어렵거나 자주 깬다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="b"><span class="custom-checkbox"></span>
+        <span class="checklist-label">아직 일어나지 않은 일이 미리 걱정된다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="b"><span class="custom-checkbox"></span>
+        <span class="checklist-label">조용한 환경에서도 마음이 편하지 않다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="c"><span class="custom-checkbox"></span>
+        <span class="checklist-label">뭘 해도 재미가 없고 의욕이 떨어진다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="a"><span class="custom-checkbox"></span>
+        <span class="checklist-label">스트레스를 받으면 두통이 온다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="a"><span class="custom-checkbox"></span>
+        <span class="checklist-label">장시간 같은 자세를 유지하는 편이다</span>
+      </label>
+      <label class="checklist-item" onclick="toggleCheck(this)">
+        <input type="checkbox" name="f"><span class="custom-checkbox"></span>
+        <span class="checklist-label">힘든 일이 있으면 생각을 안 하려고 한다</span>
+      </label>
+    </div>
+
+    <button class="submit-btn" onclick="showResult()">나의 스트레스 유형 확인하기</button>
+  </div>
+
+  <!-- Results -->
+  <div class="result-container" id="resultContainer">
+    <div class="result-card" id="resultCard"></div>
+
+    <div class="result-card">
+      <h2>유형별 점수</h2>
+      <p class="result-subtitle">8점 만점 기준</p>
+      <div class="score-bar-container" id="scoreBars"></div>
+    </div>
+
+    <div class="tip-box" id="tipBox"></div>
+
+    <button class="retry-btn" onclick="resetQuiz()">다시 진단하기</button>
+  </div>
+
+  <div class="footer">
+    &copy; MIND N SCENT
+  </div>
+</div>
+
+<script>
+const GROUPS = ['a','b','c','d','e','f'];
+const TOTAL_ITEMS = 48;
+
+const typeInfo = {
+  a: {
+    name: '긴장형',
+    emoji: '\uD83D\uDC86',
+    keyword: '이완 · 근육 풀어주기',
+    description: '몸에 긴장이 쌓여 있는 타입이에요. 어깨, 목, 턱 등에 스트레스가 신체 증상으로 나타나는 경향이 있어요.',
+    message: '우리는 기계가 아니에요. 쉬어야 하고 혼자만의 시간이 꼭 필요해요. 주춤거리게 만드는 것들에서 잠시 떨어져 스스로를 따뜻하게 감싸고 토닥이는 시간을 가져보세요.'
+  },
+  b: {
+    name: '불안형',
+    emoji: '\uD83C\uDF0A',
+    keyword: '안정 · 마음 다스리기',
+    description: '마음이 쉽게 불안해지고 긴장을 놓기 어려운 타입이에요. 수면 문제를 동반하는 경우가 많아요.',
+    message: '내가 두려워하는 모든 일이 전부 일어나지는 않아요. 내가 할 수 있는 최선을 다하고 나머지는 흐름에 맡겨보세요. 내려놓는 순간 오히려 더 많은 것이 자연스럽게 풀려가기 시작해요.'
+  },
+  c: {
+    name: '무기력형',
+    emoji: '\uD83D\uDD0B',
+    keyword: '활력 · 에너지 충전',
+    description: '에너지가 바닥나고 의욕이 떨어진 상태예요. 번아웃이 왔거나 만성 피로가 누적된 경우가 많아요.',
+    message: '완벽하지 않아도 괜찮아요. 가볍게 생각하고 가볍게 행동해보세요. 억눌린 감정을 자유롭게 표현할 때 삶에 밝고 활기찬 에너지가 흐르기 시작해요.'
+  },
+  d: {
+    name: '감정과부하형',
+    emoji: '\uD83D\uDC9C',
+    keyword: '균형 · 감정 정화',
+    description: '감정의 파도가 크고, 에너지가 빠르게 소진되는 타입이에요. 감정을 안으로 삼키는 경향이 있어요.',
+    message: '과도한 감정이 올라올 때 잠깐 멈추고 스스로를 객관적으로 바라보세요. 감정을 식힌 후 다시 바라보면 훨씬 합리적인 판단을 할 수 있어요. 삶의 목표가 선명할수록 어떤 장애물도 넘을 수 있는 힘이 생겨요.'
+  },
+  e: {
+    name: '번아웃형',
+    emoji: '\uD83D\uDD25',
+    keyword: '안착 · 내려놓기',
+    description: '쉬지 못하고 항상 뭔가를 해야 직성이 풀리는 타입이에요. 멈추면 불안하고, 일에 몰두하다 어느 날 갑자기 무너지는 패턴이에요.',
+    message: '완벽에서 벗어나 균형 잡힌 마음이 오히려 더 좋은 결과를 만들어줘요. 책임감의 무게가 쌓이다 보면 삶 자체가 무거워지기 시작해요. 잠시 그 무게를 내려놓고 가벼워진 나를 느껴보세요.'
+  },
+  f: {
+    name: '회피형',
+    emoji: '\uD83C\uDF2B\uFE0F',
+    keyword: '정화 · 각성 · 용기',
+    description: '스트레스 상황을 직면하기보다 피하거나 미루는 타입이에요. 겉으로는 괜찮아 보이지만 안으로 점점 쌓이는 경우가 많아요.',
+    message: '말하지 않으면 상대는 절대 알 수 없어요. 꾹꾹 담아두고 속상해하기보다 용기 내어 표현해 보세요. 스스로 가둔 생각과 환경에서 벗어나 호기심을 가지고 새로운 세상을 경험해 보세요.'
+  }
+};
+
+function toggleCheck(el) {
+  var cb = el.querySelector('input[type="checkbox"]');
+  cb.checked = !cb.checked;
+  el.classList.toggle('checked', cb.checked);
+  updateCounts();
+}
+
+function updateCounts() {
+  var total = 0;
+  GROUPS.forEach(function(g) {
+    total += document.querySelectorAll('input[name="'+g+'"]:checked').length;
+  });
+  var pct = Math.round((total / TOTAL_ITEMS) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = total + ' / ' + TOTAL_ITEMS;
+}
+
+function showResult() {
+  var scores = {};
+  GROUPS.forEach(function(g) {
+    scores[g] = document.querySelectorAll('input[name="'+g+'"]:checked').length;
+  });
+
+  var total = Object.values(scores).reduce(function(a,b){return a+b;}, 0);
+  if (total === 0) { alert('최소 1개 이상 체크해 주세요!'); return; }
+
+  var sorted = Object.entries(scores).sort(function(a,b){return b[1]-a[1];});
+  var first = sorted[0];
+  var second = sorted[1];
+  var diff = first[1] - second[1];
+  var isComplex = diff <= 2 && second[1] > 0;
+
+  function brAfterDot(text) {
+    return text.replace(/\.\s*/g, '.<br>');
+  }
+
+  var resultCard = document.getElementById('resultCard');
+  var firstInfo = typeInfo[first[0]];
+  var secondInfo = typeInfo[second[0]];
+
+  if (isComplex) {
+    resultCard.innerHTML =
+      '<span class="type-badge complex">복합유형</span>' +
+      '<div class="result-type-emoji">' + firstInfo.emoji + ' ' + secondInfo.emoji + '</div>' +
+      '<div class="result-type-name">' + firstInfo.name + ' + ' + secondInfo.name + '</div>' +
+      '<p style="font-size:14px;color:#6b7f6b;line-height:1.7;margin-top:12px;word-break:keep-all;overflow-wrap:break-word;">' +
+        '두 가지 유형이 비슷하게 나왔어요!<br>' +
+        brAfterDot(firstInfo.description) + '동시에, ' +
+        brAfterDot(secondInfo.description.charAt(0).toLowerCase() + secondInfo.description.slice(1)) +
+      '</p>';
+  } else {
+    resultCard.innerHTML =
+      '<span class="type-badge primary">1순위</span>' +
+      '<div class="result-type-emoji">' + firstInfo.emoji + '</div>' +
+      '<div class="result-type-name">' + firstInfo.name + '</div>' +
+      '<p style="font-size:13px;color:#6b7f6b;margin:4px 0 16px;">' + firstInfo.keyword + '</p>' +
+      '<p style="font-size:14px;color:#4a5e4a;line-height:1.7;word-break:keep-all;overflow-wrap:break-word;">' + brAfterDot(firstInfo.description) + '</p>' +
+      (second[1] > 0 ?
+        '<div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.06);">' +
+          '<span class="type-badge secondary">2순위</span>' +
+          '<div style="font-size:18px;font-weight:600;color:#3d4f3d;margin:6px 0 4px;">' +
+            secondInfo.emoji + ' ' + secondInfo.name +
+          '</div>' +
+          '<p style="font-size:13px;color:#6b7f6b;">' + secondInfo.keyword + '</p>' +
+        '</div>' : '');
+  }
+
+  var names = {a:'긴장형',b:'불안형',c:'무기력형',d:'감정과부하형',e:'번아웃형',f:'회피형'};
+  var scoreBars = document.getElementById('scoreBars');
+  scoreBars.innerHTML = sorted.map(function(item) {
+    return '<div class="score-row">' +
+      '<span class="score-label">' + names[item[0]] + '</span>' +
+      '<div class="score-bar-bg"><div class="score-bar-fill type-' + item[0] + '" style="width:' + (item[1]/8*100) + '%"></div></div>' +
+      '<span class="score-value">' + item[1] + '</span>' +
+    '</div>';
+  }).join('');
+
+  var tipBox = document.getElementById('tipBox');
+  if (isComplex) {
+    tipBox.innerHTML =
+      '<h3>당신을 위한 한마디</h3>' +
+      '<p>' + brAfterDot(firstInfo.message) + '</p>' +
+      '<p style="margin-top:12px;">' + brAfterDot(secondInfo.message) + '</p>';
+  } else {
+    tipBox.innerHTML =
+      '<h3>당신을 위한 한마디</h3>' +
+      '<p>' + brAfterDot(firstInfo.message) + '</p>';
+  }
+
+  document.getElementById('quizForm').style.display = 'none';
+  document.getElementById('resultContainer').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetQuiz() {
+  document.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.checked = false; });
+  document.querySelectorAll('.checklist-item').forEach(function(el) { el.classList.remove('checked'); });
+  updateCounts();
+  document.getElementById('quizForm').style.display = 'block';
+  document.getElementById('resultContainer').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
