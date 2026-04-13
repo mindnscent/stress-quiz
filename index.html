@@ -327,12 +327,12 @@
     transition: width 0.8s ease;
   }
 
-  .score-bar-fill.type-a { background: linear-gradient(90deg, #e8a87c, #d4956b); }
-  .score-bar-fill.type-b { background: linear-gradient(90deg, #7ec8e3, #5fb3d0); }
-  .score-bar-fill.type-c { background: linear-gradient(90deg, #f7dc6f, #f4d03f); }
-  .score-bar-fill.type-d { background: linear-gradient(90deg, #e8a0bf, #d486a8); }
-  .score-bar-fill.type-e { background: linear-gradient(90deg, #f0a868, #e09050); }
-  .score-bar-fill.type-f { background: linear-gradient(90deg, #81c784, #66bb6a); }
+  .score-bar-fill.type-a { background: linear-gradient(90deg, #6F5D9F, #5D4E8A); }
+  .score-bar-fill.type-b { background: linear-gradient(90deg, #3C775D, #2E6049); }
+  .score-bar-fill.type-c { background: linear-gradient(90deg, #DC9147, #C47E38); }
+  .score-bar-fill.type-d { background: linear-gradient(90deg, #5C86A2, #4A7290); }
+  .score-bar-fill.type-e { background: linear-gradient(90deg, #822E21, #6E251B); }
+  .score-bar-fill.type-f { background: linear-gradient(90deg, #B16694, #9A5580); }
 
   .score-value {
     width: 35px;
@@ -777,7 +777,9 @@ function showResult() {
 
   var names = {a:'긴장형',b:'불안형',c:'무기력형',d:'감정과부하형',e:'번아웃형',f:'회피형'};
   var scoreBars = document.getElementById('scoreBars');
-  scoreBars.innerHTML = sorted.map(function(item) {
+  var displayOrder = ['a','b','d','e','c','f'];
+    var orderedScores = displayOrder.map(function(key) { return [key, scores[key]]; });
+    scoreBars.innerHTML = orderedScores.map(function(item) {
     return '<div class="score-row">' +
       '<span class="score-label">' + names[item[0]] + '</span>' +
       '<div class="score-bar-bg"><div class="score-bar-fill type-' + item[0] + '" style="width:' + (item[1]/8*100) + '%"></div></div>' +
